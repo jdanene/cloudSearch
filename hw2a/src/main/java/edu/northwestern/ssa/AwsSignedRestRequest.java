@@ -44,8 +44,6 @@ public class AwsSignedRestRequest implements Closeable {
                 .signingRegion(Region.US_EAST_2)
                 .build();
 
-        System.out.println(Config.getParam("AWS_ACCESS_KEY_ID"));
-        System.out.println(Config.getParam("AWS_SECRET_ACCESS_KEY"));
 
     }
 

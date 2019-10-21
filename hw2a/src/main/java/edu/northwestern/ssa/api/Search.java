@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType;
 public class Search {
 
   ElasticSearch elasticSearch = new ElasticSearch();
-  static final String DATE_FORMAT = "YYYY-MM-DD";
+  static final String DATE_FORMAT = "yyyy-MM-dd";
   Set<String> ISO_LANGUAGES = new HashSet<>(Arrays.asList(Locale.getISOLanguages()));
 
   /**
@@ -86,9 +86,8 @@ public class Search {
     }
 
     // Check that date is formatted as "YYYY-MM-DD"
-    Optional<String> optionalDateParam = Optional.ofNullable(dateParam);
-    if (optionalDateParam.isPresent()) {
-      if (!(isDateValid(optionalDateParam.get()))) {
+    if (dateParam!=null) {
+      if (!(isDateValid(dateParam))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
             .entity("Invalid value: Date")
@@ -98,9 +97,8 @@ public class Search {
     }
 
     // Check that language is of ISO
-    Optional<String> optionalLanguageParam = Optional.ofNullable(languageParam);
-    if (optionalLanguageParam.isPresent()) {
-      if (!(ISO_LANGUAGES.contains(optionalLanguageParam.get()))) {
+    if (languageParam != null) {
+      if (!(ISO_LANGUAGES.contains(languageParam))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
             .entity("Invalid value: Language")
@@ -110,10 +108,10 @@ public class Search {
     }
 
     // Check that count parameter is unsigned integer
-    Optional<String> optionalCountParam = Optional.ofNullable(countParam);
-    if (optionalCountParam.isPresent()) {
-      if (!(optionalCountParam.get().matches("^//d+$"))) {
-        return Response.status(406)
+
+    if (countParam != null) {
+      if (!(countParam.matches("^[0-9]+"))) {
+          return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
             .entity("Invalid value: Count")
             .header("Access-Control-Allow-Origin", "*")
@@ -122,9 +120,8 @@ public class Search {
     }
 
     // Check that offset parameter is unsigned integer
-    Optional<String> optionalOffsetParam = Optional.ofNullable(offsetParam);
-    if (optionalOffsetParam.isPresent()) {
-      if (!(optionalOffsetParam.get().matches("^//d+$"))) {
+    if (offsetParam!=null) {
+      if (!(offsetParam.matches("^[0-9]+"))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
             .entity("Invalid value: Offset")
@@ -133,8 +130,13 @@ public class Search {
       }
     }
 
-    // Post  query to ElasticSearch
-    ElasticSearch elasticSearch = new ElasticSearch();
+      Optional<String> optionalDateParam = Optional.ofNullable(dateParam);
+      Optional<String> optionalOffsetParam = Optional.ofNullable(offsetParam);
+      Optional<String> optionalCountParam = Optional.ofNullable(countParam);
+      Optional<String> optionalLanguageParam = Optional.ofNullable(languageParam);
+
+
+      // Post  query to ElasticSearch
     HttpExecuteResponse httpExecuteResponse = null;
     try {
       httpExecuteResponse =
@@ -155,8 +157,9 @@ public class Search {
     // Get the body of the response
     String requestBody;
     try {
-      requestBody =
-          ElasticSearch.formatPayload(AwsSignedRestRequest.getResponseBody(httpExecuteResponse));
+      requestBody = AwsSignedRestRequest.getResponseBody(httpExecuteResponse);
+      System.out.println(requestBody);
+        requestBody = ElasticSearch.formatPayload(requestBody);
 
     } catch (IOException e) {
       return Response.status(500)
