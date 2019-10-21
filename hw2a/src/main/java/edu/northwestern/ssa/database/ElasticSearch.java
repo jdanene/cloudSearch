@@ -106,7 +106,10 @@ public class ElasticSearch extends AwsSignedRestRequest {
     JSONObject data = new JSONObject();
 
     if (isNullOrEmpty(json, "hits")) {
-      return data.toString();
+      data.put("returned_results", new JSONObject());
+      data.put("total_results", new JSONObject());
+      data.put("articles", new ArrayList<>());
+      return data.toString(4);
     } else {
 
       // Get the jsonObject of hits
@@ -154,15 +157,18 @@ public class ElasticSearch extends AwsSignedRestRequest {
       luceneQuery =luceneQuery+" AND lang:" + languageParam.get();
     }
 
+
     if (dateParam.isPresent()){
       luceneQuery = luceneQuery+" AND date:" + dateParam.get() ;
 
     }
-    System.out.println(dateParam.isPresent());
+
+    System.out.println(luceneQuery);
 
     HashMap<String, String> queryMap = new HashMap<>();
     queryMap.put("q", luceneQuery);
     queryMap.put("size", countParam.orElse(DEFAULT_COUNT));
+    queryMap.put("track_total_hits","true");
     offsetParam.ifPresent(s -> queryMap.put("from", s));
     String path = String.format("/%s/_search", INDEX);
 

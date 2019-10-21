@@ -62,10 +62,10 @@ public class Search {
   @ApiResponses(
       value = {
         @ApiResponse(code = 200, message = "Query Successful"),
-        @ApiResponse(code = 404, message = "Required query parameter missing"),
+        @ApiResponse(code = 400, message = "Required query parameter missing"),
         @ApiResponse(code = 500, message = "Internal Server Error"),
         @ApiResponse(code = 502, message = "Bad gateway"),
-        @ApiResponse(code = 406, message = "Invalid value")
+        @ApiResponse(code = 406, message = "Invalid value for key")
       })
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ public class Search {
 
     // Check that required parameter "query" is present
     if (queryParam == null) {
-      return Response.status(404)
+      return Response.status(400)
           .type(MediaType.TEXT_PLAIN)
           .entity("Missing required parameter `query`")
           .header("Access-Control-Allow-Origin", "*")
@@ -90,7 +90,7 @@ public class Search {
       if (!(isDateValid(dateParam))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
-            .entity("Invalid value: Date")
+            .entity("Invalid value for key: `date`")
             .header("Access-Control-Allow-Origin", "*")
             .build();
       }
@@ -101,19 +101,18 @@ public class Search {
       if (!(ISO_LANGUAGES.contains(languageParam))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
-            .entity("Invalid value: Language")
+            .entity("Invalid value for key: `language`, not a ISO Language Code")
             .header("Access-Control-Allow-Origin", "*")
             .build();
       }
     }
 
     // Check that count parameter is unsigned integer
-
     if (countParam != null) {
       if (!(countParam.matches("^[0-9]+"))) {
           return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
-            .entity("Invalid value: Count")
+            .entity("Invalid value for key: `count`")
             .header("Access-Control-Allow-Origin", "*")
             .build();
       }
@@ -124,7 +123,7 @@ public class Search {
       if (!(offsetParam.matches("^[0-9]+"))) {
         return Response.status(406)
             .type(MediaType.TEXT_PLAIN)
-            .entity("Invalid value: Offset")
+            .entity("Invalid value key: `offset`")
             .header("Access-Control-Allow-Origin", "*")
             .build();
       }
